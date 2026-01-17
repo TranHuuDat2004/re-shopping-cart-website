@@ -1,85 +1,60 @@
-name: CI/CD Pipeline
+name: Build & Deploy Spring Boot App to AWS EC2
 
 on:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
-
-env:
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-  IMAGE_NAME: re-shopping-cart-web-app
-  EC2_HOST: ${{ secrets.EC2_HOST }}
-  EC2_USER: ${{ secrets.EC2_USER }}
-  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  build-push-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
-
-      - name: Build Docker image
-        run: |
-          docker build -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest .
-          docker build -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:${{ github.sha }} .
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Build and push Docker image to Docker Hub
+        uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USER }}/re-shopping-cart-web-app:latest
 
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest
-          docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:${{ github.sha }}
+      - name: SSH into EC2 and deploy container
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo ">>> Stopping and removing old container if exists"
+            docker rm -f re-shopping-cart-web-app || true
+            docker rmi ${{ secrets.DOCKER_USER }}/re-shopping-cart-web-app:latest || true
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key
-          chmod 600 ~/.ssh/ec2_key
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+            echo ">>> Pulling latest image from Docker Hub"
+            docker pull ${{ secrets.DOCKER_USER }}/re-shopping-cart-web-app:latest
 
-      - name: Deploy to EC2
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        run: |
-          ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << EOF
-            # Login to Docker Hub
-            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-            
-            # Stop and remove existing container
-            docker stop $IMAGE_NAME || true
-            docker rm $IMAGE_NAME || true
-            
-            # Pull latest image
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
-            
-            # Run new container
+            echo ">>> Running container"
             docker run -d \
-              --name $IMAGE_NAME \
+              --name re-shopping-cart-web-app \
               --restart unless-stopped \
               -p 8080:8080 \
-              --env-file .env.prod \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
-          EOF
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e DB_URL='${{ secrets.DB_URL }}' \
+              -e DB_USERNAME='${{ secrets.DB_USERNAME }}' \
+              -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+              -e JAVA_OPTS="-Xms512m -Xmx512m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0" \
+              -e TZ=UTC \
+              ${{ secrets.DOCKER_USER }}/re-shopping-cart-web-app:latest
+
+            echo ">>> Status & logs"
+            docker ps -a --filter "name=re-shopping-cart-web-app"
+            docker logs --tail 50 re-shopping-cart-web-app
