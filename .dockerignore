@@ -1,0 +1,62 @@
+# Gradle
+.gradle/
+build/
+gradle/
+gradlew
+gradlew.bat
+gradle-wrapper.jar
+gradle-wrapper.properties
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+
+# Build artifacts
+*.jar
+*.war
+*.ear
+*.class
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files (will be provided at runtime)
+.env
+.env.local
+.env.prod
+.env.example
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+src/test/
+
+# Git
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# CI/CD
+.github/
+
+# Scripts
+*.ps1
+*.sh
