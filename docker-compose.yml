@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - DB_URL=jdbc:mysql://db:3306/shop_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_URL=jdbc:mysql://db:3306/shop_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
       - DB_USERNAME=root
       - DB_PASSWORD=root
     depends_on:
@@ -18,26 +18,27 @@ services:
 
   db:
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
       MYSQL_DATABASE: shop_db
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./shop.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - shop-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
   db_data:
+
 
 networks:
   shop-network:

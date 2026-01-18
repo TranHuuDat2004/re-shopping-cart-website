@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS defaultdb;
-USE defaultdb;
+CREATE DATABASE IF NOT EXISTS shop_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE shop_db;
 
 -- =====================
 -- USERS
@@ -54,8 +54,8 @@ INSERT INTO users (name) VALUES
 -- PRODUCTS (CHỈ 2 SẢN PHẨM)
 -- =====================
 INSERT INTO products (name, image_url, price) VALUES
-('Ốp điện thoại', 'op-dien-thoai.jpg', 155000),
-('Sạc điện thoại', 'cong-chuyen-usb.jpg', 150000);
+('Phone Case', 'op-dien-thoai.jpg', 155000),
+('Phone Charger', 'cong-chuyen-usb.jpg', 150000);
 
 -- =====================
 -- CARTS
@@ -68,5 +68,5 @@ INSERT INTO carts (user_id) VALUES
 -- CART ITEMS (CHỈ 2 SẢN PHẨM)
 -- =====================
 INSERT INTO cart_items (cart_id, product_id, quantity) VALUES
-(1, 1, 4), -- Ốp điện thoại x4
-(1, 2, 1); -- Sạc điện thoại x1
+(1, 1, 4), -- Phone Case x4
+(1, 2, 1); -- Phone Charger x1

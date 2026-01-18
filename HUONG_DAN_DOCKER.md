@@ -35,7 +35,7 @@ Sau khi chạy lệnh khởi động thành công, bạn cấu hình MySQL Workb
 3.  Điền thông tin:
     *   **Connection Name:** `Docker Shop DB` (hoặc tên tùy ý)
     *   **Hostname:** `localhost`
-    *   **Port:** `3306`
+    *   **Port:** `3307` (Do cổng 3306 đã bị MySQL trên máy bạn chiếm)
     *   **Username:** `root`
 4.  Bấm **Store in Vault...** (hoặc Test Connection) và nhập password: `root`
 5.  Bấm **OK** để lưu và kết nối.
@@ -45,6 +45,11 @@ Sau khi chạy lệnh khởi động thành công, bạn cấu hình MySQL Workb
 *   **Database Name:** `shop_db`
 *   **Dữ liệu khởi tạo:** Hệ thống sẽ tự động chạy file `shop.sql` khi khởi tạo lần đầu để tạo bảng và dữ liệu mẫu.
 
+> **Lưu ý khi chạy trên máy khác:** Bạn cần copy cả file `docker-compose.yml` và `shop.sql` sang máy đó thì mới chạy được database nhé (vì file SQL được mount từ bên ngoài vào).
+
 ## 5. Truy cập Website
 
 Sau khi khởi động xong, truy cập: [http://localhost:8080](http://localhost:8080)
+
+### Lưu ý
+Docker MySQL đang chạy ở port **3307** để tránh xung đột với MySQL có sẵn trên máy bạn.

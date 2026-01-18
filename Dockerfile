@@ -1,18 +1,21 @@
 # Multi-stage build for production-ready Spring Boot application
 
 # Stage 1: Build
-FROM gradle:8.5-jdk21 AS build
+# Stage 1: Build
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
 # Copy Gradle files
-COPY build.gradle settings.gradle gradle.properties ./
+COPY build.gradle settings.gradle gradle.properties gradlew ./
+RUN sed -i '/org.gradle.java.home/d' gradle.properties
 COPY gradle/ ./gradle/
 
 # Copy source code
 COPY src/ ./src/
 
 # Build the application
-RUN gradle clean build -x test --no-daemon
+RUN chmod +x gradlew
+RUN ./gradlew clean build -x test --no-daemon
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
