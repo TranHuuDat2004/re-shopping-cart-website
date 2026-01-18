@@ -40,3 +40,7 @@ out/
 .env
 .env.prod
 .env.local
+
+### Ngrok ###
+tools/ngrok/ngrok.yml
+*.ngrok
