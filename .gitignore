@@ -44,3 +44,4 @@ out/
 ### Ngrok ###
 tools/ngrok/ngrok.yml
 *.ngrok
+*.ps1

@@ -6,8 +6,8 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Thiết lập JAVA_HOME
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-25"
-$env:PATH = "C:\Program Files\Java\jdk-25\bin;$env:PATH"
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+$env:PATH = "C:\Program Files\Java\jdk-21\bin;$env:PATH"
 
 Write-Host "JAVA_HOME: $env:JAVA_HOME" -ForegroundColor Green
 Write-Host "Java Version:" -ForegroundColor Yellow
