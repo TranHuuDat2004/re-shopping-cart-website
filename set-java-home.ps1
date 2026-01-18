@@ -1,6 +1,6 @@
 # Script để thiết lập JAVA_HOME vĩnh viễn trên Windows
 
-$javaPath = "C:\Program Files\Java\jdk-25"
+$javaPath = "C:\Program Files\Java\jdk-21"
 
 # Thiết lập JAVA_HOME cho User Environment Variables
 [System.Environment]::SetEnvironmentVariable("JAVA_HOME", $javaPath, [System.EnvironmentVariableTarget]::User)
